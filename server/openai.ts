@@ -1,15 +1,9 @@
 import OpenAI from "openai";
 import { type ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
-// Using OpenRouter for access to multiple AI models
+// Using direct OpenAI API connection
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENROUTER_API_KEY || "",  // Using OpenRouter API key
-  baseURL: "https://openrouter.ai/api/v1",
-  defaultHeaders: {
-    "HTTP-Referer": "https://replit.com/",
-    "X-Title": "AI Chatbot",
-    "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
-  },
+  apiKey: process.env.OPENAI_API_KEY || ""  // Using OpenAI API key directly
 });
 
 export interface ChatMessage {
@@ -24,9 +18,9 @@ export async function generateChatCompletion(
 ): Promise<string> {
   try {
     // Check if API key is available
-    if (!process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY.trim() === "") {
-      console.warn("OpenRouter API key is missing. Please provide a valid API key.");
-      return "I'm having trouble connecting to my AI service. Please check that you've provided a valid OpenRouter API key.";
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return "I'm having trouble connecting to my AI service. Please check that you've provided a valid OpenAI API key.";
     }
     
     // Prepare messages for API
@@ -43,18 +37,19 @@ export async function generateChatCompletion(
       ];
     }
 
-    // Map our simplified model names to OpenRouter model identifiers
+    // Use the appropriate OpenAI model based on selection
+    // Note: We can only use OpenAI models now
     const modelMapping: Record<string, string> = {
-      "gpt": "openai/gpt-4o",
-      "claude": "anthropic/claude-3-opus",
-      "llama": "meta-llama/llama-3-70b-instruct",
-      "gemini": "google/gemini-pro",
+      "gpt": "gpt-4o", // Using native GPT-4o
+      "claude": "gpt-4o", // Fallback to GPT-4o since we can't use Claude directly
+      "llama": "gpt-4o", // Fallback to GPT-4o
+      "gemini": "gpt-4o", // Fallback to GPT-4o
     };
 
-    const openRouterModel = modelMapping[modelName] || "openai/gpt-4o";
+    const openAIModel = modelMapping[modelName] || "gpt-4o";
 
     const response = await openai.chat.completions.create({
-      model: openRouterModel,
+      model: openAIModel,
       messages: apiMessages,
       temperature: 0.7,
       max_tokens: 1000,
@@ -71,13 +66,13 @@ export async function generateChatCompletion(
 export async function analyzeImage(base64Image: string, prompt: string): Promise<string> {
   try {
     // Check if API key is available
-    if (!process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY.trim() === "") {
-      console.warn("OpenRouter API key is missing. Please provide a valid API key.");
-      return "I'm having trouble connecting to my image analysis service. Please check that you've provided a valid OpenRouter API key.";
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return "I'm having trouble connecting to my image analysis service. Please check that you've provided a valid OpenAI API key.";
     }
     
     const response = await openai.chat.completions.create({
-      model: "openai/gpt-4o", // OpenRouter format for GPT-4o, which has vision capabilities
+      model: "gpt-4o", // Using direct GPT-4o which has vision capabilities
       messages: [
         {
           role: "user",
@@ -113,17 +108,17 @@ export async function analyzeSentiment(text: string): Promise<{
 }> {
   try {
     // Check if API key is available
-    if (!process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY.trim() === "") {
-      console.warn("OpenRouter API key is missing. Please provide a valid API key.");
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
       return {
         sentiment: "neutral",
         score: 0,
-        explanation: "Unable to analyze sentiment due to missing API key. Please provide a valid OpenRouter API key."
+        explanation: "Unable to analyze sentiment due to missing API key. Please provide a valid OpenAI API key."
       };
     }
     
     const response = await openai.chat.completions.create({
-      model: "openai/gpt-4o", // OpenRouter format
+      model: "gpt-4o", // Using direct OpenAI model
       messages: [
         {
           role: "system",
@@ -158,13 +153,13 @@ export async function analyzeSentiment(text: string): Promise<{
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     // Check if API key is available
-    if (!process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY.trim() === "") {
-      console.warn("OpenRouter API key is missing. Please provide a valid API key.");
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
       return new Array(1536).fill(0); // Return a zero vector of typical embedding size
     }
     
     const response = await openai.embeddings.create({
-      model: "openai/text-embedding-3-small", // OpenRouter format
+      model: "text-embedding-3-small", // Direct OpenAI model
       input: text,
       encoding_format: "float"
     });
@@ -182,9 +177,9 @@ export async function simulateModelResponse(
   messages: ChatMessage[],
 ): Promise<string> {
   // Check if API key is missing, and provide a helpful response
-  if (!process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY.trim() === "") {
-    console.warn("OpenRouter API key is missing. Please provide a valid API key.");
-    return "I need a valid OpenRouter API key to work properly. Please provide one in the environment variables.";
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+    console.warn("OpenAI API key is missing. Please provide a valid API key.");
+    return "I need a valid OpenAI API key to work properly. Please provide one in the environment variables.";
   }
   
   // Create appropriate system prompts for different model personas
@@ -205,10 +200,10 @@ export async function simulateModelResponse(
   }
   
   try {
-    // Pass the model name to use the appropriate OpenRouter model
+    // All models will use GPT-4o under the hood but with different personas
     return await generateChatCompletion(messages, systemPrompt, model);
   } catch (error) {
     console.error("Error in simulateModelResponse:", error);
-    return "I encountered an error processing your request. Please check your OpenRouter API key and try again.";
+    return "I encountered an error processing your request. Please check your OpenAI API key and try again.";
   }
 }
