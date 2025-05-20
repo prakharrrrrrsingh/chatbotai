@@ -2,7 +2,9 @@ import OpenAI from "openai";
 import { type ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. Do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || "" // This allows us to check if the key is missing
+});
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -14,6 +16,12 @@ export async function generateChatCompletion(
   systemPrompt?: string
 ): Promise<string> {
   try {
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return "I'm having trouble connecting to my AI service. Please check that you've provided a valid OpenAI API key.";
+    }
+    
     // Prepare messages for OpenAI API
     let apiMessages: ChatCompletionMessageParam[] = messages.map(msg => ({
       role: msg.role,
@@ -45,6 +53,12 @@ export async function generateChatCompletion(
 // Function for analyzing images with vision capabilities
 export async function analyzeImage(base64Image: string, prompt: string): Promise<string> {
   try {
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return "I'm having trouble connecting to my image analysis service. Please check that you've provided a valid OpenAI API key.";
+    }
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -70,7 +84,7 @@ export async function analyzeImage(base64Image: string, prompt: string): Promise
     return response.choices[0].message.content || "I couldn't analyze this image.";
   } catch (error) {
     console.error("Error analyzing image:", error);
-    throw new Error("Failed to analyze the image");
+    return "I encountered an error while analyzing this image. Please make sure your OpenAI API key has access to GPT-4o Vision capabilities.";
   }
 }
 
@@ -81,6 +95,16 @@ export async function analyzeSentiment(text: string): Promise<{
   explanation: string;
 }> {
   try {
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return {
+        sentiment: "neutral",
+        score: 0,
+        explanation: "Unable to analyze sentiment due to missing API key. Please provide a valid OpenAI API key."
+      };
+    }
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -105,13 +129,23 @@ export async function analyzeSentiment(text: string): Promise<{
     };
   } catch (error) {
     console.error("Error analyzing sentiment:", error);
-    throw new Error("Failed to analyze sentiment");
+    return {
+      sentiment: "neutral",
+      score: 0,
+      explanation: "An error occurred while analyzing sentiment. Please check your OpenAI API key."
+    };
   }
 }
 
 // Function to generate text embeddings for semantic search
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+      console.warn("OpenAI API key is missing. Please provide a valid API key.");
+      return new Array(1536).fill(0); // Return a zero vector of typical embedding size
+    }
+    
     const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
@@ -121,7 +155,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     return response.data[0].embedding;
   } catch (error) {
     console.error("Error generating embedding:", error);
-    throw new Error("Failed to generate text embedding");
+    return new Array(1536).fill(0); // Return a zero vector on error
   }
 }
 
@@ -130,9 +164,14 @@ export async function simulateModelResponse(
   model: string,
   messages: ChatMessage[],
 ): Promise<string> {
+  // Check if API key is missing, and provide a helpful response
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
+    console.warn("OpenAI API key is missing. Please provide a valid API key.");
+    return "I need a valid OpenAI API key to work properly. Please provide one in the environment variables.";
+  }
+  
   // In a production app, this would call different AI providers
   // For now, we'll use OpenAI for all models with a note about the simulation
-  
   let systemPrompt = "";
   
   switch (model) {
@@ -149,5 +188,10 @@ export async function simulateModelResponse(
       systemPrompt = "You are an AI assistant powered by GPT-4o. Please provide helpful, accurate, and ethical responses.";
   }
   
-  return generateChatCompletion(messages, systemPrompt);
+  try {
+    return await generateChatCompletion(messages, systemPrompt);
+  } catch (error) {
+    console.error("Error in simulateModelResponse:", error);
+    return "I encountered an error processing your request. Please check your OpenAI API key and try again.";
+  }
 }
