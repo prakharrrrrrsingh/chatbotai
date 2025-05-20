@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 235 86% 65%;
+  --primary-foreground: 0 0% 100%;
+  --primary-light: 231 91% 73%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 0 0% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 16% 65%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 0 0% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 0 0% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --primary: 235 86% 65%;
+  --primary-foreground: 0 0% 100%;
+  --primary-light: 231 91% 73%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply antialiased bg-background text-foreground;
+  }
+}
+
+.message-enter {
+  animation: message-fade-in 0.3s ease-out;
+}
+
+@keyframes message-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-slate-800 rounded-lg;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-slate-600 rounded-lg;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-slate-500;
+}
+
+.dot-typing {
+  position: relative;
+  left: -9999px;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background-color: hsl(var(--primary));
+  animation: dot-typing 1.5s infinite linear;
+}
+
+@keyframes dot-typing {
+  0% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+  16.667% {
+    box-shadow: 9984px -10px 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+  33.333% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+  50% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px -10px 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+  66.667% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+  83.333% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px -10px 0 0 hsl(var(--primary));
+  }
+  100% {
+    box-shadow: 9984px 0 0 0 hsl(var(--primary)), 9999px 0 0 0 hsl(var(--primary)), 10014px 0 0 0 hsl(var(--primary));
+  }
+}
