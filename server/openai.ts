@@ -7,7 +7,8 @@ const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   defaultHeaders: {
     "HTTP-Referer": "https://replit.com/",
-    "X-Title": "AI Chatbot"
+    "X-Title": "AI Chatbot",
+    "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
   },
 });
 
