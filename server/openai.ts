@@ -159,19 +159,17 @@ export async function analyzeSentiment(text: string): Promise<{
 // Function to generate text embeddings for semantic search
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    // Check if API key is available
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === "") {
-      console.warn("OpenAI API key is missing. Please provide a valid API key.");
-      return new Array(1536).fill(0); // Return a zero vector of typical embedding size
-    }
+    // In demo mode, return a simulated embedding instead of calling the API
+    console.log("Using simulated embedding response");
     
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-small", // Direct OpenAI model
-      input: text,
-      encoding_format: "float"
-    });
-
-    return response.data[0].embedding;
+    // Create a deterministic but unique embedding based on text content
+    // This is just for demo purposes - not a real embedding algorithm
+    const seed = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const mockEmbedding = new Array(1536).fill(0).map((_, i) => 
+      Math.sin(seed * (i + 1) / 1536) / 2 + 0.5
+    );
+    
+    return mockEmbedding;
   } catch (error) {
     console.error("Error generating embedding:", error);
     return new Array(1536).fill(0); // Return a zero vector on error
