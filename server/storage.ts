@@ -66,8 +66,9 @@ export class MemStorage implements IStorage {
       ...insertMessage, 
       id, 
       createdAt: new Date(),
-      // Ensure conversationId is always a number
-      conversationId: insertMessage.conversationId || 0
+      // Ensure required fields are always set
+      conversationId: insertMessage.conversationId || 0,
+      model: insertMessage.model || null
     };
     this.messages.set(id, message);
     return message;
