@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes"; // will edit this next
 import { setupVite, serveStatic, log } from "./vite";
 import { webcrypto } from "crypto";
@@ -8,6 +9,13 @@ if (!globalThis.crypto) {
 }
 
 const app = express();
+
+// Add CORS middleware here
+app.use(cors({
+  origin: ["http://localhost:5173", "https://chatbotai-ntnt.vercel.app"],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -43,7 +51,7 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // ✅ Your actual AI route — make sure it's after registerRoutes
+  // Your AI route — after registerRoutes
   app.post("/api/chat", async (req: Request, res: Response) => {
     const { messages } = req.body;
     const lastMessage = messages?.[messages.length - 1]?.content?.toLowerCase() || "";

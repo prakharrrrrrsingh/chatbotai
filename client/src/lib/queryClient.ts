@@ -1,6 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Remove trailing slash from BASE_URL if present
+const BASE_URL = import.meta.env.VITE_API_BASE_URL.replace(/\/$/, "");
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
