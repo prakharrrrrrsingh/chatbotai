@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes"; // will edit this next
 import { setupVite, serveStatic, log } from "./vite";
-import { webcrypto } from 'crypto';
+import { webcrypto } from "crypto";
 
 if (!globalThis.crypto) {
   (globalThis as any).crypto = webcrypto;
@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Middleware for logging API responses
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -43,12 +43,12 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // ✅ Place /api/chat route AFTER registerRoutes so it takes effect
+  // ✅ Your actual AI route — make sure it's after registerRoutes
   app.post("/api/chat", async (req: Request, res: Response) => {
     const { messages } = req.body;
     const lastMessage = messages?.[messages.length - 1]?.content?.toLowerCase() || "";
 
-    console.log("Received message:", lastMessage); // Debug
+    console.log("Received:", lastMessage); // Debugging
 
     if (lastMessage.includes("tell me a joke")) {
       return res.json({ message: getRandomJoke() });
@@ -78,8 +78,8 @@ app.use((req, res, next) => {
       return res.json({ message: getRandomTrivia() });
     }
 
-    // Fallback response
-    res.json({
+    // Fallback
+    return res.json({
       message: "Hello! I'm your GPT assistant. How can I help you today?",
     });
   });
@@ -92,7 +92,6 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Vite setup
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
@@ -100,35 +99,35 @@ app.use((req, res, next) => {
   }
 
   const port = 5000;
-  server.listen(port, "127.0.0.1", () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();
 
-// 🔽 Helper Functions
+// Helpers
 function getRandomJoke(): string {
   const jokes = [
-    "Why don't scientists trust atoms? Because they make up everything!",
-    "Why did the scarecrow win an award? Because he was outstanding in his field!",
-    "Why don’t skeletons fight each other? They don’t have the guts.",
+    "Why don’t scientists trust atoms? Because they make up everything!",
+    "Why did the math book look sad? Because it had too many problems.",
+    "Why do we never tell secrets on a farm? Because the potatoes have eyes and the corn has ears.",
   ];
   return jokes[Math.floor(Math.random() * jokes.length)];
 }
 
 function getRandomQuote(): string {
   const quotes = [
-    "Believe you can and you're halfway there.",
+    "Believe in yourself and all that you are.",
+    "Start where you are. Use what you have. Do what you can.",
     "The only way to do great work is to love what you do.",
-    "Your limitation—it’s only your imagination.",
   ];
   return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
 function getRandomTrivia(): string {
-  const facts = [
-    "Honey never spoils. Archaeologists found pots of honey in ancient tombs!",
-    "Bananas are berries, but strawberries aren't.",
+  const trivia = [
+    "Did you know? A group of flamingos is called a 'flamboyance'!",
     "Octopuses have three hearts and blue blood.",
+    "Bananas are technically berries, but strawberries aren't!",
   ];
-  return facts[Math.floor(Math.random() * facts.length)];
+  return trivia[Math.floor(Math.random() * trivia.length)];
 }
